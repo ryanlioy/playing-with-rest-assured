@@ -1,17 +1,11 @@
 package dev.ryanlioy.restassured.test;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.http.Header;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.with;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -57,5 +51,56 @@ public class User {
                 .then()
                 .statusCode(404)
                 .body("isEmpty()", is(true));
+    }
+
+    @Test
+    public void createUser() {
+        given()
+                .header("Content-type", "application/json")
+                .header(AUTH_HEADER)
+                .body(
+                      """
+                      {
+                        "name": "name",
+                        "job": "job"
+                      }
+                      """
+                )
+                .when()
+                .post("/users")
+                .then()
+                .statusCode(201)
+                .body("id", not(nullValue()))
+                .body("name", equalTo("name"))
+                .body("job", equalTo("job"));
+    }
+
+    @Test
+    public void updateUser() {
+     given()
+             .header("Content-type", "application/json")
+             .header(AUTH_HEADER)
+             .body(
+                   """
+                   {
+                       "name": "name",
+                       "job": "job"
+                   }
+                   """)
+             .put("/users/1")
+             .then()
+             .statusCode(200)
+             .body("name", equalTo("name"))
+             .body("job", equalTo("job"));
+    }
+
+    @Test
+    public void deleteUser() {
+        given()
+                .header("Content-type", "application/json")
+                .header(AUTH_HEADER)
+                .delete("/users/1")
+                .then()
+                .statusCode(204);
     }
 }
